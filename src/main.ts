@@ -38,6 +38,10 @@ function inTargetFolder(file: TFile, settings: PluginSettings): boolean {
 	if (!filePath) return false;
 
 	for (const folder of settings.includeFolders) {
+		// Support "**" to match all folders
+		if (folder === "**") {
+			return true;
+		}
 		// Support recursive matching with POSIX-style "/**" suffix
 		if (folder.endsWith("/**")) {
 			const baseFolder = folder.slice(0, -3); // Remove "/**"
@@ -277,10 +281,10 @@ class AutoFilenameSettings extends PluginSettingTab {
 		new Setting(this.containerEl)
 			.setName("Include")
 			.setDesc(
-				"Folder paths where Auto Filename would auto rename files. Separate by new line. Case sensitive. Use /** suffix for recursive matching (e.g., folder/** matches folder and all subfolders).",
+				"Folder paths where Auto Filename would auto rename files. Separate by new line. Case sensitive. Use ** for all folders, or folder/** for recursive matching.",
 			)
 			.addTextArea((text) => {
-				text.setPlaceholder("/\nfolder\nfolder/**")
+				text.setPlaceholder("**\nfolder\nfolder/**")
 					.setValue(this.plugin.settings.includeFolders.join("\n"))
 					.onChange(async (value) => {
 						this.plugin.settings.includeFolders = value.split("\n");
