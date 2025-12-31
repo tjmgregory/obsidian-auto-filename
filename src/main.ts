@@ -34,11 +34,26 @@ let previousFile: string;
 function inTargetFolder(file: TFile, settings: PluginSettings): boolean {
 	if (settings.includeFolders.length === 0) return false; // False if user has no target folder selected
 
-	// True if folder is included
-	if (settings.includeFolders.includes(file.parent?.path as string))
-		return true;
+	const filePath = file.parent?.path;
+	if (!filePath) return false;
 
-	return false; // False if all checks fails
+	for (const folder of settings.includeFolders) {
+		// Support recursive matching with POSIX-style "/**" suffix
+		if (folder.endsWith("/**")) {
+			const baseFolder = folder.slice(0, -3); // Remove "/**"
+			// Match the base folder itself or any subfolder
+			if (filePath === baseFolder || filePath.startsWith(baseFolder + "/")) {
+				return true;
+			}
+		} else {
+			// Exact match (original behavior)
+			if (filePath === folder) {
+				return true;
+			}
+		}
+	}
+
+	return false; // False if all checks fail
 }
 
 export default class AutoFilename extends Plugin {
@@ -262,10 +277,10 @@ class AutoFilenameSettings extends PluginSettingTab {
 		new Setting(this.containerEl)
 			.setName("Include")
 			.setDesc(
-				"Folder paths where Auto Filename would auto rename files. Separate by new line. Case sensitive.",
+				"Folder paths where Auto Filename would auto rename files. Separate by new line. Case sensitive. Use /** suffix for recursive matching (e.g., folder/** matches folder and all subfolders).",
 			)
 			.addTextArea((text) => {
-				text.setPlaceholder("/\nfolder\nfolder/subfolder")
+				text.setPlaceholder("/\nfolder\nfolder/**")
 					.setValue(this.plugin.settings.includeFolders.join("\n"))
 					.onChange(async (value) => {
 						this.plugin.settings.includeFolders = value.split("\n");

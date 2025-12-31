@@ -22,11 +22,13 @@
     - Include
         - Field: accepts folder paths from vault.
         - Folder paths where Auto Filename would auto rename files. Separate by new line. Case sensitive.
+        - Use `/**` suffix for recursive matching (includes all subfolders).
         - Default: none
         - Examples:
-            - My Folder
-            - Folder/Sub Folder
-            - /
+            - `My Folder` - only files directly in "My Folder"
+            - `Folder/Sub Folder` - only files directly in "Folder/Sub Folder"
+            - `Notes/**` - files in "Notes" and all its subfolders (recursive)
+            - `/` - files in vault root
     - Use header as filename
         - Toggle
         - Uses the header as filename if the file starts with an H1.
